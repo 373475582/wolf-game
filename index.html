@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>锅打灰太狼</title>
+    <style>
+    * {margin: 0; padding: 0;}
+    #game {position: relative;width: 320px;height: 480px;margin: 50px auto;background: url(img/game_bg.jpg) no-repeat;}
+    #score {color: #fff;font-size: 25px;line-height: 46px;text-indent: 60px;}
+    #progress {position: absolute;top: 66px;left: 63px;width: 180px;height: 16px;background: url(img/progress.png) no-repeat;}
+    #wolves {position: absolute;left: 0;top: 0;width: 100%;height: 100%;}
+    #wolves img {position: absolute;left: 94px;top: 114px;}
+    #menu {position: absolute;left: 0;top: 0;width: 100%;height: 100%;background: rgba(0, 0, 0, 0.5);}
+    #menu p {position: absolute;top: 0;bottom: 0;left: 0;right: 0;width: 200px;height: 50px;margin: auto;color: #fff;cursor: pointer;font-size: 30px;line-height: 50px;text-align: center;text-shadow: 0 0 20px red;}
+    </style>
+</head>
+
+<body>
+    <div id="game">
+        <div id="score">0</div>
+        <div id="progress"></div>
+        <div id="wolves">
+            <!-- <img src="img/h5.png" alt=""> -->
+        </div>
+        <div id="menu">
+            <p id="start">开始游戏</p>
+        </div>
+    </div>
+    <script src="posi.js"></script>
+    <script>
+    //获取元素
+	    var	startBtn = document.getElementById('start'),
+	    	menu = document.getElementById('menu'),
+	    	score = document.getElementById('score'),
+	    	progress = document.getElementById('progress'),
+	    	wolves = document.getElementById('wolves');
+	    var positions = [posi1, posi2, posi3, posi4, posi5, posi6, posi7, posi8, posi9];
+	    //时间定时器
+	    var timeTimer;
+	    //狼定时器
+	    var wolfTimer;
+	    startBtn.onclick = function() {
+	        menu.style.display = "none";
+	        timeTimer = setInterval(changeTime, 300);
+	        wolfTimer = setInterval(createWolf, 2000);
+	    }
+	    var progressValue = 180;
+
+	    function changeTime() {
+	        progressValue--;
+	        progress.style.width = progressValue + "px";
+	        if (progressValue == 0) {
+	            menu.style.display = "block";
+	            startBtn.innerHTML = "再来一次吧！";
+	            clearInterval(timeTimer);
+	            clearInterval(wolfTimer);
+	            progressValue = 180;
+	            progress.style.width = "180px";
+	            score.innerHTML = 0;
+	        }
+	    }
+
+	    function createWolf() {
+	        var wolfImg = document.createElement("img");
+	        var num = randomNumber(1, 100);
+	        wolfImg.type = num > 80 ? "x" : "h";
+	        var posi = randomNumber(0, positions.length - 1);
+	        var positionObj = positions[posi];
+	        wolfImg.style.top = positionObj.t + "px";
+	        wolfImg.style.left = positionObj.l + "px";
+	        wolves.appendChild(wolfImg);
+	        //上下动作
+	        upDownAnimation(wolfImg);
+	        //敲打
+	        addTarget(wolfImg)
+	    }
+
+	    function upDownAnimation(wolfImg) {
+	        wolfImg.positionIndex = 0;
+	        wolfImg.upTimer = setInterval(function() {
+	            wolfImg.src = "img/" + wolfImg.type + wolfImg.positionIndex + ".png";
+	            wolfImg.positionIndex++;
+	            if (wolfImg.positionIndex > 5) {
+	                clearInterval(wolfImg.upTimer);
+	                wolfImg.downTimer = setInterval(function() {
+	                    wolfImg.positionIndex--;
+	                    wolfImg.src = "img/" + wolfImg.type + wolfImg.positionIndex + ".png";
+	                    if (wolfImg.positionIndex == 0) {
+	                        clearInterval(wolfImg.downTimer);
+	                        wolves.removeChild(wolfImg);
+	                    }
+	                }, 100)
+	            }
+	        }, 100)
+	    }
+
+	    function addTarget(obj) {
+	        obj.onclick = function() {
+	            if (obj.hit == true) {
+	                return;
+	            }
+	            obj.hit = true;
+	            clearInterval(obj.upTimer);
+	            clearInterval(obj.downTimer);
+	            addScore(obj);
+	            var hitIndex = 5;
+	            var timer = setInterval(function() {
+	                hitIndex++;
+	                obj.src = "img/" + obj.type + hitIndex + ".png";
+	                if (hitIndex == 9) {
+	                    clearInterval(timer);
+	                    setTimeout(function() {
+	                        wolves.removeChild(obj)
+	                    }, 300)
+	                }
+	            }, 100)
+	        }
+	    }
+
+	    function addScore(obj) {
+	    	var currentScore = score.innerText - 0;
+	    	if(obj.type == 'h'){
+	    		score.innerText = currentScore + 10;
+	    	}else{
+	    		score.innerText = currentScore - 10;
+	    	}
+	    }
+
+	    function randomNumber(min, max) {
+	        return parseInt(Math.random() * (max - min + 1) + min)
+	    }
+    </script>
+</body>
+
+</html>
